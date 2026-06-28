@@ -48,7 +48,10 @@ const certlyProject: ProjectShowcaseData = {
   architecture: [
     { label: "Frontend", value: "React with TanStack-driven app state" },
     { label: "Backend", value: "Supabase data and auth foundation" },
-    { label: "Product flow", value: "Practice sets, mock exams, review queues" },
+    {
+      label: "Product flow",
+      value: "Practice sets, mock exams, review queues",
+    },
   ],
 };
 
@@ -68,7 +71,8 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
   const scale = useTransform(scrollYProgress, range.input, [0.98, 1, 1, 0.98]);
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const nextVisible = latest >= range.visibleStart && latest <= range.visibleEnd;
+    const nextVisible =
+      latest >= range.visibleStart && latest <= range.visibleEnd;
     if (nextVisible === visibleRef.current) return;
     visibleRef.current = nextVisible;
     setVisible(nextVisible);
@@ -77,7 +81,7 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
   return (
     <section className="pointer-events-none" aria-label="Project">
       <motion.div
-        className={`fixed left-1/2 top-[9vh] z-2 w-[calc(100vw-1rem)] max-w-[62rem] -translate-x-1/2 md:left-[clamp(1.25rem,6vw,5rem)] md:top-1/2 md:w-[min(62rem,calc(100vw-6rem))] md:translate-x-0 md:-translate-y-1/2 ${
+        className={`fixed left-1/2 top-[9vh] z-2 w-[calc(100vw-1rem)] max-w-248 -translate-x-1/2 md:left-[clamp(1.25rem,6vw,5rem)] md:top-1/2 md:w-[min(62rem,calc(100vw-6rem))] md:translate-x-0 md:-translate-y-1/2 ${
           visible ? "pointer-events-auto" : "pointer-events-none"
         }`}
         style={{ opacity, y, scale }}
@@ -89,9 +93,9 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
           glowIntensity="sm"
           shadowIntensity="sm"
           borderRadius="28px"
-          className="w-full overflow-hidden bg-[color-mix(in_srgb,var(--color-paper)_24%,transparent)]"
+          className="w-full overflow-hidden bg-[color-mix(in_srgb,var(--color-paper)_60%,transparent)]"
         >
-          <div className="relative z-30 grid gap-4 p-4 text-[var(--color-ink)] md:grid-cols-[1.08fr_0.92fr] md:gap-6 md:p-6">
+          <div className="relative z-30 grid gap-4 p-4 text-ink md:grid-cols-[1.08fr_0.92fr] md:gap-6 md:p-6">
             <div className="min-w-0">
               <img
                 src={project.imageSrc}
@@ -114,7 +118,7 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
                   </span>
                 ))}
               </div>
-              <p className="mt-2 max-w-[34rem] text-[0.84rem] leading-[1.45] text-[color-mix(in_srgb,var(--color-ink)_72%,transparent)] md:text-[1rem]">
+              <p className="mt-2 max-w-136 text-[0.84rem] leading-[1.45] text-[color-mix(in_srgb,var(--color-ink)_72%,transparent)] md:text-[1rem]">
                 {project.description}
               </p>
 
@@ -123,7 +127,7 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
                   href={project.siteHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-9 items-center rounded-full bg-[color-mix(in_srgb,var(--color-ink)_84%,transparent)] px-4 text-[0.78rem] text-[var(--color-paper)] no-underline transition-transform active:scale-95"
+                  className="inline-flex min-h-9 items-center rounded-full bg-[color-mix(in_srgb,var(--color-ink)_84%,transparent)] px-4 text-[0.78rem] text-paper no-underline transition-transform active:scale-95"
                 >
                   Visit site
                 </a>
@@ -134,7 +138,7 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
               <p className="m-0 text-[0.68rem] uppercase tracking-[0.14em] text-[color-mix(in_srgb,var(--color-ink)_58%,transparent)]">
                 Build notes
               </p>
-              <p className="m-0 mt-1 text-[0.9rem] font-medium text-[var(--color-ink)]">
+              <p className="m-0 mt-1 text-[0.9rem] font-medium text-ink">
                 {project.name} app architecture
               </p>
               <ul className="m-0 mt-3 grid list-none gap-2 p-0">

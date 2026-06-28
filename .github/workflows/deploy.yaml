@@ -19,6 +19,8 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          PUBLIC_CONTACT_ENDPOINT: ${{ secrets.PUBLIC_CONTACT_ENDPOINT }}
 
       - uses: cloudflare/wrangler-action@v3
         with:

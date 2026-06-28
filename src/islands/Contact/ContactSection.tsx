@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
@@ -16,12 +14,17 @@ const CONTACT_SECTION_INDEX = 5;
 const FADE_PORTION = 0.1;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Google Apps Script web-app URL (public endpoint, not a secret).
+// Set PUBLIC_CONTACT_ENDPOINT in .env to the deployed /exec URL.
+const CONTACT_ENDPOINT = import.meta.env.PUBLIC_CONTACT_ENDPOINT ?? "";
+
 type ContactForm = {
   email: string;
   message: string;
 };
 
 type ContactErrors = Partial<ContactForm>;
+type SubmitStatus = "idle" | "submitting" | "success" | "error";
 
 function sectionRange(index: number) {
   const size = 1 / TOTAL_SECTIONS;
@@ -41,7 +44,7 @@ export default function ContactSection() {
   const visibleRef = useRef(false);
   const [form, setForm] = useState<ContactForm>({ email: "", message: "" });
   const [errors, setErrors] = useState<ContactErrors>({});
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [status, setStatus] = useState<SubmitStatus>("idle");
   const { scrollYProgress } = useScroll();
   const range = sectionRange(CONTACT_SECTION_INDEX);
   const opacity = useTransform(scrollYProgress, range.input, [0, 1, 1, 0]);
@@ -54,7 +57,8 @@ export default function ContactSection() {
   const scale = useTransform(scrollYProgress, range.input, [0.98, 1, 1, 0.98]);
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const nextVisible = latest >= range.visibleStart && latest <= range.visibleEnd;
+    const nextVisible =
+      latest >= range.visibleStart && latest <= range.visibleEnd;
     if (nextVisible === visibleRef.current) return;
     visibleRef.current = nextVisible;
     setVisible(nextVisible);
@@ -64,14 +68,24 @@ export default function ContactSection() {
     (field: keyof ContactForm) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((current) => ({ ...current, [field]: event.target.value }));
-      setFeedback(null);
+      if (status !== "idle") setStatus("idle");
       if (errors[field]) {
         setErrors((current) => ({ ...current, [field]: undefined }));
       }
     };
 
-  const handleSubmit = (event: { preventDefault: () => void }) => {
+  const handleSubmit = async (event: {
+    preventDefault: () => void;
+    currentTarget: HTMLFormElement;
+  }) => {
     event.preventDefault();
+
+    // Honeypot: real users never fill this hidden field; bots do.
+    const honeypot = new FormData(event.currentTarget).get("company");
+    if (honeypot) {
+      setStatus("success");
+      return;
+    }
 
     const email = form.email.trim();
     const message = form.message.trim();
@@ -88,19 +102,28 @@ export default function ContactSection() {
     }
 
     setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
-    if (Object.keys(nextErrors).length > 0) {
-      setFeedback(null);
-      return;
+    setStatus("submitting");
+    try {
+      // No custom Content-Type → "simple" request, dodges the CORS preflight
+      // that Apps Script web apps can't answer. Body stays a JSON string.
+      const response = await fetch(CONTACT_ENDPOINT, {
+        method: "POST",
+        body: JSON.stringify({ email, message }),
+      });
+      if (!response.ok) throw new Error(`Bad status ${response.status}`);
+      setForm({ email: "", message: "" });
+      setStatus("success");
+    } catch {
+      setStatus("error");
     }
-
-    setFeedback("Thanks. I will get back to you soon.");
   };
 
   return (
     <section className="pointer-events-none" aria-label="Contact">
       <motion.div
-        className={`fixed left-1/2 top-[9vh] z-[2] w-[calc(100vw-1rem)] max-w-[54rem] -translate-x-1/2 md:left-[clamp(1.25rem,6vw,5rem)] md:top-1/2 md:w-[min(54rem,calc(100vw-6rem))] md:translate-x-0 md:-translate-y-1/2 ${
+        className={`fixed left-1/2 top-[9vh] z-2 w-[calc(100vw-1rem)] max-w-216 -translate-x-1/2 md:left-[clamp(1.25rem,6vw,5rem)] md:top-1/2 md:w-[min(54rem,calc(100vw-6rem))] md:translate-x-0 md:-translate-y-1/2 ${
           visible ? "pointer-events-auto" : "pointer-events-none"
         }`}
         style={{ opacity, y, scale }}
@@ -112,12 +135,12 @@ export default function ContactSection() {
           glowIntensity="sm"
           shadowIntensity="sm"
           borderRadius="28px"
-          className="w-full overflow-hidden bg-[color-mix(in_srgb,var(--color-paper)_25%,transparent)]"
+          className="w-full overflow-hidden bg-[color-mix(in_srgb,var(--color-paper)_60%,transparent)]"
         >
           <form
             noValidate
             onSubmit={handleSubmit}
-            className="relative z-30 grid gap-4 p-4 text-[var(--color-ink)] md:grid-cols-[0.9fr_1.1fr] md:gap-6 md:p-6"
+            className="relative z-30 grid gap-4 p-4 text-ink md:grid-cols-[0.9fr_1.1fr] md:gap-6 md:p-6"
           >
             <div className="min-w-0">
               <p className="m-0 text-[0.64rem] uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-ink)_66%,transparent)] md:text-[0.72rem]">
@@ -145,9 +168,11 @@ export default function ContactSection() {
                   value={form.email}
                   onChange={updateField("email")}
                   aria-invalid={Boolean(errors.email)}
-                  aria-describedby={errors.email ? "contact-email-error" : undefined}
+                  aria-describedby={
+                    errors.email ? "contact-email-error" : undefined
+                  }
                   placeholder="you@example.com"
-                  className="min-h-11 w-full rounded-2xl border border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] bg-[color-mix(in_srgb,white_18%,transparent)] px-3 text-[0.9rem] text-[var(--color-ink)] outline-none shadow-[inset_0_1px_0_color-mix(in_srgb,white_28%,transparent)] transition-[border-color,background-color,box-shadow] placeholder:text-[color-mix(in_srgb,var(--color-ink)_38%,transparent)] focus:border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] focus:bg-[color-mix(in_srgb,white_28%,transparent)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-ink)_8%,transparent)]"
+                  className="min-h-11 w-full rounded-2xl border border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] bg-[color-mix(in_srgb,white_18%,transparent)] px-3 text-[0.9rem] text-ink outline-none shadow-[inset_0_1px_0_color-mix(in_srgb,white_28%,transparent)] transition-[border-color,background-color,box-shadow] placeholder:text-[color-mix(in_srgb,var(--color-ink)_38%,transparent)] focus:border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] focus:bg-[color-mix(in_srgb,white_28%,transparent)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-ink)_8%,transparent)]"
                 />
                 {errors.email ? (
                   <p
@@ -175,7 +200,7 @@ export default function ContactSection() {
                     errors.message ? "contact-message-error" : undefined
                   }
                   placeholder="Tell me what you want to build or discuss."
-                  className="min-h-32 w-full resize-none rounded-2xl border border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] bg-[color-mix(in_srgb,white_18%,transparent)] px-3 py-3 text-[0.9rem] leading-[1.4] text-[var(--color-ink)] outline-none shadow-[inset_0_1px_0_color-mix(in_srgb,white_28%,transparent)] transition-[border-color,background-color,box-shadow] placeholder:text-[color-mix(in_srgb,var(--color-ink)_38%,transparent)] focus:border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] focus:bg-[color-mix(in_srgb,white_28%,transparent)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-ink)_8%,transparent)]"
+                  className="min-h-32 w-full resize-none rounded-2xl border border-[color-mix(in_srgb,var(--color-ink)_12%,transparent)] bg-[color-mix(in_srgb,white_18%,transparent)] px-3 py-3 text-[0.9rem] leading-[1.4] text-ink outline-none shadow-[inset_0_1px_0_color-mix(in_srgb,white_28%,transparent)] transition-[border-color,background-color,box-shadow] placeholder:text-[color-mix(in_srgb,var(--color-ink)_38%,transparent)] focus:border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] focus:bg-[color-mix(in_srgb,white_28%,transparent)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-ink)_8%,transparent)]"
                 />
                 {errors.message ? (
                   <p
@@ -187,16 +212,38 @@ export default function ContactSection() {
                 ) : null}
               </div>
 
+              {/* Honeypot — hidden from humans, catches bots. */}
+              <input
+                type="text"
+                name="company"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute left-[-9999px] h-0 w-0 opacity-0"
+              />
+
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <button
                   type="submit"
-                  className="inline-flex min-h-10 w-full items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-ink)_84%,transparent)] px-5 text-[0.82rem] text-[var(--color-paper)] transition-transform active:scale-95 sm:w-auto"
+                  disabled={status === "submitting"}
+                  className="inline-flex min-h-10 w-full items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-ink)_84%,transparent)] px-5 text-[0.82rem] text-paper transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
-                  Send message
+                  {status === "submitting" ? "Sending…" : "Send message"}
                 </button>
-                {feedback ? (
-                  <p className="m-0 text-[0.78rem] text-[color-mix(in_srgb,var(--color-ink)_72%,transparent)]">
-                    {feedback}
+                {status === "success" ? (
+                  <p
+                    role="status"
+                    className="m-0 text-[0.78rem] text-[color-mix(in_srgb,var(--color-ink)_72%,transparent)]"
+                  >
+                    Thanks. I'll get back to you soon.
+                  </p>
+                ) : null}
+                {status === "error" ? (
+                  <p
+                    role="alert"
+                    className="m-0 text-[0.78rem] text-[color-mix(in_srgb,#9f1d1d_82%,var(--color-ink))]"
+                  >
+                    Something went wrong — email me directly instead.
                   </p>
                 ) : null}
               </div>
