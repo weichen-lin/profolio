@@ -1,0 +1,107 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  role?: string;
+  tech?: string[];
+  year: number;
+  link?: string;
+  repo?: string;
+}
+const { title, summary, role, tech = [], year, link, repo } = Astro.props;
+---
+
+<article class="project">
+  <header class="project-head">
+    <h3 class="project-title">{title}</h3>
+    <span class="project-year">{year}</span>
+  </header>
+  {role && <p class="project-role">{role}</p>}
+  <p class="project-summary">{summary}</p>
+  {
+    tech.length > 0 && (
+      <ul class="project-tech">
+        {tech.map((t) => (
+          <li>{t}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    (link || repo) && (
+      <p class="project-links">
+        {link && (
+          <a href={link} target="_blank" rel="noopener noreferrer">
+            Visit ↗
+          </a>
+        )}
+        {repo && (
+          <a href={repo} target="_blank" rel="noopener noreferrer">
+            Code ↗
+          </a>
+        )}
+      </p>
+    )
+  }
+</article>
+
+<style>
+  .project {
+    padding: 1.5rem 1.5rem 1.6rem;
+    border: 1px solid color-mix(in srgb, var(--color-line) 16%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  }
+  .project-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .project-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+  .project-year {
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+  .project-role {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    margin-top: 0.35rem;
+  }
+  .project-summary {
+    margin-top: 0.75rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+  .project-tech {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .project-tech li {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-line) 22%, transparent);
+  }
+  .project-links {
+    margin-top: 1.1rem;
+    display: flex;
+    gap: 1.25rem;
+  }
+  .project-links a {
+    font-size: 0.9rem;
+    color: var(--color-ink);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+import SectionCard from "../ui/SectionCard.astro";
+
+const groups = [
+  { label: "Languages", items: ["TypeScript", "JavaScript", "Python", "SQL"] },
+  { label: "Frontend", items: ["React", "Astro", "CSS / Tailwind", "GSAP"] },
+  { label: "Backend", items: ["Node", "PostgreSQL", "REST / GraphQL"] },
+  { label: "Toolbox", items: ["Git", "Figma", "Docker", "Vitest"] },
+];
+---
+
+<section id="skills" data-stop>
+  <SectionCard eyebrow="Second stop · Skills" align="left" wide>
+    <h2 class="display title">What's in the toolkit</h2>
+    <p class="body">
+      The gear I reach for most. Placeholder list — trim it to what's true for
+      you.
+    </p>
+    <div class="grid">
+      {
+        groups.map((g) => (
+          <div class="group">
+            <h3 class="group-label">{g.label}</h3>
+            <ul class="chips">
+              {g.items.map((it) => (
+                <li class="chip">{it}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </SectionCard>
+</section>
+
+<style>
+  .title {
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+  }
+  .body {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem 2.5rem;
+    margin-top: 1.75rem;
+  }
+  .group-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+  }
+  .chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-line) 28%, transparent);
+    border-radius: 999px;
+    color: var(--color-ink);
+  }
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>

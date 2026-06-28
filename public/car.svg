@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170" fill="none">
+  <!-- ground shadow -->
+  <ellipse cx="110" cy="150" rx="92" ry="15" fill="#1c1c22" opacity="0.16"/>
+
+  <!-- wheels -->
+  <rect x="22"  y="116" width="30" height="40" rx="12" fill="#23232b"/>
+  <rect x="168" y="116" width="30" height="40" rx="12" fill="#23232b"/>
+
+  <!-- lower body -->
+  <path d="M26 138
+           C16 138 12 128 14 116
+           L22 78
+           C26 60 40 50 60 50
+           L160 50
+           C180 50 194 60 198 78
+           L206 116
+           C208 128 204 138 194 138 Z"
+        fill="#e2654f"/>
+  <!-- body shading -->
+  <path d="M26 138 C16 138 12 128 14 116 L18 96 L202 96 L206 116 C208 128 204 138 194 138 Z"
+        fill="#c9513c"/>
+
+  <!-- roof / cabin -->
+  <path d="M58 52
+           L70 20
+           C73 11 80 6 90 6
+           L130 6
+           C140 6 147 11 150 20
+           L162 52 Z"
+        fill="#e2654f"/>
+
+  <!-- rear window -->
+  <path d="M70 50 L80 24 C82 18 86 15 92 15 L128 15 C134 15 138 18 140 24 L150 50 Z"
+        fill="#cfe6ef"/>
+  <line x1="110" y1="15" x2="110" y2="50" stroke="#aacbd8" stroke-width="3"/>
+
+  <!-- tail lights -->
+  <rect x="22"  y="98" width="30" height="16" rx="6" fill="#ffd166"/>
+  <rect x="168" y="98" width="30" height="16" rx="6" fill="#ffd166"/>
+
+  <!-- bumper + plate -->
+  <rect x="14" y="122" width="192" height="12" rx="6" fill="#2a2a30"/>
+  <rect x="86" y="118" width="48" height="16" rx="3" fill="#f4f1ea" stroke="#2a2a30" stroke-width="2"/>
+</svg>

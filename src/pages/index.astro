@@ -1,0 +1,151 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Intro from "../components/sections/Intro.astro";
+import CapabilityRoadSigns from "../islands/Capabilities/CapabilityRoadSigns";
+import CertlyProjectShowcase from "../islands/Projects/CertlyProjectShowcase";
+import ContactSection from "../islands/Contact/ContactSection";
+import ScrollFinale from "../islands/Finale/ScrollFinale";
+import RoadTrip from "../islands/RoadTrip/RoadTrip";
+---
+
+<BaseLayout>
+  <div id="scroll-root">
+    <!-- Driving road backdrop (fixed) -->
+    <div class="road-stage transition-[filter] duration-200">
+      <RoadTrip client:load />
+    </div>
+
+    <div class="initial-cue" aria-hidden="true">
+      <img src="/avatar.png" alt="" width="64" height="64" />
+      <p>Please scroll down</p>
+    </div>
+
+    <!-- Content components go here, one at a time, scrolling over the road. -->
+    <main class="content">
+      <Intro />
+      <CapabilityRoadSigns client:load />
+      <CertlyProjectShowcase client:load />
+      <ContactSection client:load />
+      <ScrollFinale client:load />
+    </main>
+  </div>
+</BaseLayout>
+
+<script>
+  let ticking = false;
+  let hasScrolled = false;
+  let lastIntroOpacity = "";
+
+  const setScrolledState = () => {
+    const root = document.documentElement;
+    const scrollY = window.scrollY;
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = scrollY / maxScroll;
+    const totalSections = 6;
+    const sectionSize = 1 / totalSections;
+    const fadeSize = sectionSize * 0.1;
+    const sectionStart = 0;
+    const sectionEnd = sectionSize;
+
+    const fadeIn = Math.min(
+      1,
+      Math.max(0, (progress - sectionStart) / fadeSize),
+    );
+    const fadeOut = Math.min(
+      1,
+      Math.max(0, (sectionEnd - progress) / fadeSize),
+    );
+    const introOpacity = Math.min(fadeIn, fadeOut);
+
+    const nextHasScrolled = scrollY > 8;
+    const nextIntroOpacity = introOpacity.toFixed(3);
+
+    if (nextHasScrolled !== hasScrolled) {
+      hasScrolled = nextHasScrolled;
+      root.classList.toggle("has-scrolled", hasScrolled);
+    }
+    if (nextIntroOpacity !== lastIntroOpacity) {
+      lastIntroOpacity = nextIntroOpacity;
+      root.style.setProperty("--intro-opacity", nextIntroOpacity);
+    }
+  };
+
+  setScrolledState();
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        setScrolledState();
+      });
+    },
+    { passive: true },
+  );
+</script>
+
+<style is:global>
+  #scroll-root {
+    position: relative;
+  }
+  .road-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--backdrop);
+  }
+  .road-stage .rt-stage,
+  .road-stage .rt-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* six scroll scenes at roughly 160vh each, so every section can hold
+     before it fades into the next one. */
+  .content {
+    position: relative;
+    z-index: 1;
+    min-height: 960vh;
+  }
+
+  .initial-cue {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition:
+      opacity 0.32s ease,
+      transform 0.32s ease;
+  }
+  .initial-cue img {
+    width: clamp(3.75rem, 8vw, 5.25rem);
+    height: clamp(3.75rem, 8vw, 5.25rem);
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid color-mix(in srgb, var(--color-paper) 80%, transparent);
+    box-shadow: 0 18px 48px -24px rgba(28, 28, 34, 0.58);
+  }
+  .initial-cue p {
+    margin: 0;
+    color: var(--color-ink);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .has-scrolled .initial-cue {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 0.75rem));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .initial-cue {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+import SectionCard from "../ui/SectionCard.astro";
+---
+
+<section id="about" data-stop>
+  <SectionCard eyebrow="First stop · About me" align="right">
+    <h2 class="display title">A little about the driver</h2>
+    <p class="body">
+      Placeholder bio. Two or three sentences in your own voice — what you do,
+      what you care about, and the kind of problems you like to solve. Keep it
+      warm and human; this is the part where someone decides they'd enjoy a long
+      drive with you.
+    </p>
+    <p class="body">
+      Swap this copy out later. The whole site is built so you only edit text
+      and Markdown — the road keeps driving itself.
+    </p>
+  </SectionCard>
+</section>
+
+<style>
+  .title {
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+  }
+  .body {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+  }
+</style>

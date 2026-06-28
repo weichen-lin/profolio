@@ -1,0 +1,57 @@
+---
+import { getCollection } from "astro:content";
+import SectionCard from "../ui/SectionCard.astro";
+import TimelineItem from "../ui/TimelineItem.astro";
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+
+const experience = (await getCollection("experience")).sort((a, b) => {
+  const ord = a.data.order - b.data.order;
+  return ord !== 0 ? ord : b.data.start.getTime() - a.data.start.getTime();
+});
+---
+
+<section id="experience" data-stop>
+  <SectionCard eyebrow="Fourth stop · Experience" align="left" wide>
+    <h2 class="display title">The road so far</h2>
+    <p class="body">
+      Where I've driven before. Entries live in
+      <code>src/content/experience</code>.
+    </p>
+    <ul class="timeline">
+      {
+        experience.map((e) => (
+          <TimelineItem
+            company={e.data.company}
+            role={e.data.role}
+            period={`${fmt(e.data.start)} — ${e.data.end ? fmt(e.data.end) : "Present"}`}
+            location={e.data.location}
+            highlights={e.data.highlights}
+          />
+        ))
+      }
+    </ul>
+  </SectionCard>
+</section>
+
+<style>
+  .title {
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+  }
+  .body {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+  }
+  .body code {
+    font-size: 0.9em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--color-line) 10%, transparent);
+  }
+  .timeline {
+    margin: 1.9rem 0 0;
+    padding: 0;
+  }
+</style>

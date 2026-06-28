@@ -1,0 +1,84 @@
+---
+import SectionCard from "../ui/SectionCard.astro";
+
+const email = "you@example.com";
+const socials = [
+  { label: "GitHub", href: "https://github.com/yourname" },
+  { label: "LinkedIn", href: "https://linkedin.com/in/yourname" },
+  { label: "Email", href: `mailto:${email}` },
+];
+---
+
+<section id="contact" data-stop>
+  <SectionCard eyebrow="Destination · Contact" align="right">
+    <p class="arrived" aria-hidden="true">You've arrived 🏁</p>
+    <h2 class="display title">Let's start the next journey together</h2>
+    <p class="body">
+      Thanks for riding along. If something here resonated, I'd love to hear
+      where you're headed — let's find out if our roads run the same way.
+    </p>
+    <a class="cta" href={`mailto:${email}`}>Say hello →</a>
+    <ul class="socials">
+      {
+        socials.map((s) => (
+          <li>
+            <a href={s.href} target="_blank" rel="noopener noreferrer">
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </SectionCard>
+</section>
+
+<style>
+  .arrived {
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+  .title {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+  }
+  .body {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+    max-width: 30rem;
+  }
+  .cta {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.8rem 1.6rem;
+    border-radius: 999px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: transform 0.2s ease;
+  }
+  .cta:hover {
+    transform: translateY(-2px);
+  }
+  .socials {
+    list-style: none;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+  }
+  .socials a {
+    color: var(--color-ink);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 35%, transparent);
+    padding-bottom: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cta {
+      transition: none;
+    }
+  }
+</style>

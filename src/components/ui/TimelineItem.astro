@@ -1,0 +1,85 @@
+---
+interface Props {
+  company: string;
+  role: string;
+  period: string;
+  location?: string;
+  highlights?: string[];
+}
+const { company, role, period, location, highlights = [] } = Astro.props;
+---
+
+<li class="item">
+  <span class="dot" aria-hidden="true"></span>
+  <div class="item-body">
+    <div class="item-head">
+      <h3 class="item-role">{role}</h3>
+      <span class="item-period">{period}</span>
+    </div>
+    <p class="item-company">
+      {company}{location && <span class="item-loc"> · {location}</span>}
+    </p>
+    {
+      highlights.length > 0 && (
+        <ul class="item-points">
+          {highlights.map((h) => (
+            <li>{h}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</li>
+
+<style>
+  .item {
+    position: relative;
+    list-style: none;
+    padding: 0 0 1.75rem 1.75rem;
+    border-left: 1px solid color-mix(in srgb, var(--color-line) 20%, transparent);
+  }
+  .item:last-child {
+    padding-bottom: 0;
+  }
+  .dot {
+    position: absolute;
+    left: -5px;
+    top: 0.35rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    border: 1.5px solid var(--color-ink);
+  }
+  .item-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .item-role {
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+  .item-period {
+    font-size: 0.82rem;
+    color: var(--color-ink-soft);
+  }
+  .item-company {
+    margin-top: 0.2rem;
+    color: var(--color-ink-soft);
+  }
+  .item-loc {
+    color: var(--color-ink-soft);
+  }
+  .item-points {
+    margin: 0.75rem 0 0;
+    padding-left: 1.1rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+  .item-points li + li {
+    margin-top: 0.35rem;
+  }
+</style>

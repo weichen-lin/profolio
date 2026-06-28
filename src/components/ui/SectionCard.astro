@@ -1,0 +1,60 @@
+---
+interface Props {
+  eyebrow: string;
+  align?: "left" | "right";
+  wide?: boolean;
+}
+const { eyebrow, align = "left", wide = false } = Astro.props;
+---
+
+<div class:list={["stop", `stop--${align}`]}>
+  <div class:list={["card", "reveal", { "card--wide": wide }]}>
+    <p class="eyebrow">{eyebrow}</p>
+    <slot />
+  </div>
+</div>
+
+<style>
+  .stop {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 14vh 7vw;
+  }
+  .stop--left {
+    justify-content: flex-start;
+  }
+  .stop--right {
+    justify-content: flex-end;
+  }
+
+  .card {
+    width: min(40rem, 100%);
+    padding: 2.75rem 2.5rem;
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--color-paper) 78%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-line) 14%, transparent);
+    box-shadow: 0 22px 60px -32px rgba(28, 28, 34, 0.45);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+  }
+  .card--wide {
+    width: min(52rem, 100%);
+  }
+  .card > :global(* + *) {
+    margin-top: 1rem;
+  }
+  .card .eyebrow + :global(*) {
+    margin-top: 0.85rem;
+  }
+
+  @media (max-width: 768px) {
+    .stop {
+      padding: 12vh 5vw;
+      justify-content: center;
+    }
+    .card {
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>

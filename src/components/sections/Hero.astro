@@ -1,0 +1,56 @@
+---
+import SectionCard from "../ui/SectionCard.astro";
+---
+
+<section id="hero" data-stop>
+  <SectionCard eyebrow="Start of the journey" align="left">
+    <h1 class="display hero-title">
+      Hi, I'm <span class="name">Your Name</span>.<br />Let's take the long road.
+    </h1>
+    <p class="lede">
+      This isn't a résumé. It's a road trip. Keep scrolling and we'll drive
+      through the things I've built, the people I've worked with, and where I'm
+      headed next.
+    </p>
+    <p class="hint" aria-hidden="true">↓ scroll to drive</p>
+  </SectionCard>
+</section>
+
+<style>
+  .hero-title {
+    font-size: clamp(2.4rem, 6vw, 4.25rem);
+  }
+  .name {
+    font-weight: 500;
+  }
+  .lede {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+    max-width: 32rem;
+  }
+  .hint {
+    margin-top: 1.75rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    animation: nudge 1.8s ease-in-out infinite;
+  }
+  @keyframes nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(5px);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hint {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+import { getCollection } from "astro:content";
+import SectionCard from "../ui/SectionCard.astro";
+import ProjectCard from "../ui/ProjectCard.astro";
+
+const projects = (await getCollection("projects")).sort((a, b) => {
+  const ord = a.data.order - b.data.order;
+  return ord !== 0 ? ord : b.data.year - a.data.year;
+});
+---
+
+<section id="projects" data-stop>
+  <SectionCard eyebrow="Third stop · Projects" align="right" wide>
+    <h2 class="display title">Stops worth pulling over for</h2>
+    <p class="body">
+      A few things I've built. Add or edit entries in
+      <code>src/content/projects</code> — each Markdown file becomes a card.
+    </p>
+    <div class="projects">
+      {
+        projects.map((p) => (
+          <ProjectCard
+            title={p.data.title}
+            summary={p.data.summary}
+            role={p.data.role}
+            tech={p.data.tech}
+            year={p.data.year}
+            link={p.data.link}
+            repo={p.data.repo}
+          />
+        ))
+      }
+    </div>
+  </SectionCard>
+</section>
+
+<style>
+  .title {
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+  }
+  .body {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+  }
+  .body code {
+    font-size: 0.9em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.35rem;
+    background: color-mix(in srgb, var(--color-line) 10%, transparent);
+  }
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+  }
+  @media (max-width: 768px) {
+    .projects {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
