@@ -39,8 +39,9 @@ export default function ContactSection() {
     reduceMotion ? 0 : 20,
     0,
     0,
+    reduceMotion ? 0 : -20,
   ]);
-  const scale = useTransform(scrollYProgress, range.input, [0.98, 1, 1]);
+  const scale = useTransform(scrollYProgress, range.input, [0.98, 1, 1, 0.98]);
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const nextVisible =
