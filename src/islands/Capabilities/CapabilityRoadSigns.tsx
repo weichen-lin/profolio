@@ -12,6 +12,7 @@ import {
 import { Icon, addCollection } from "@iconify/react";
 import { Popover } from "radix-ui";
 import { LiquidGlassCard } from "../../components/ui/liquid-glass";
+import { sectionRange } from "../scrollSections";
 import deviconSubset from "./devicon-subset.json";
 
 // Register the trimmed devicon set once, offline (no Iconify CDN calls).
@@ -244,21 +245,7 @@ const capabilities: Capability[] = [
   },
 ];
 
-const TOTAL_SECTIONS = 6;
 const FIRST_CAPABILITY_SECTION = 1;
-const FADE_PORTION = 0.1;
-
-function sectionRange(index: number) {
-  const size = 1 / TOTAL_SECTIONS;
-  const start = index * size;
-  const end = start + size;
-  const fade = size * FADE_PORTION;
-  return {
-    input: [start, start + fade, end - fade, end],
-    visibleStart: start + fade,
-    visibleEnd: end - fade,
-  };
-}
 
 function CapabilitySection({
   capability,
@@ -273,7 +260,7 @@ function CapabilitySection({
   const visibleRef = useRef(false);
   const { scrollYProgress } = useScroll();
   const range = sectionRange(sectionIndex);
-  const opacity = useTransform(scrollYProgress, range.input, [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, range.input, range.output);
   const y = useTransform(scrollYProgress, range.input, [
     reduceMotion ? 0 : 20,
     0,

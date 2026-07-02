@@ -9,6 +9,7 @@ import {
   DRIVE_LEN,
   HORIZON,
   BOTTOM,
+  CAR,
   SKY_DAY,
   SKY_DUSK,
   SUN,
@@ -40,10 +41,12 @@ function warmFactor(p: number) {
 }
 
 const S_MIN = NEAR / FAR;
+const CRUISE_START = 0.94;
+const CRUISE_FULL = 0.995;
+const CRUISE_SPEED = SPAN * 0.45;
 
-// Scene-only driver: the car launches from a close-up, shrinks into the
-// distance and drives the road forward as you scroll, while scenery streams
-// past and the sky warms toward golden hour. No content overlays here.
+// Scene-only driver: the car drives straight forward into a cruising position,
+// then the road and scenery keep streaming past it.
 export function useRoadTimeline({ scope, carRef, sunRef, reduced, compact }: Refs) {
   useGSAP(
     () => {
@@ -74,10 +77,10 @@ export function useRoadTimeline({ scope, carRef, sunRef, reduced, compact }: Ref
         el.style.opacity = String(o);
       };
 
-      const frame = (p: number) => {
-        const launch = smooth(0, 0.82, p);
-        const driveP = smooth(0.07, 1, p);
-        const D = driveP * DRIVE_LEN;
+      const frame = (p: number, cruiseD = 0) => {
+        const launch = smooth(0, 0.96, p);
+        const driveP = smooth(0.02, 1, p);
+        const D = driveP * DRIVE_LEN + cruiseD;
         const roadReveal = smooth(0.02, 0.22, p);
 
         for (const el of dashes) {
@@ -88,15 +91,15 @@ export function useRoadTimeline({ scope, carRef, sunRef, reduced, compact }: Ref
           place(el, wrapZ(parseFloat(el.dataset.z || "0"), D), worldX);
         }
 
-        // car: close-up launch -> shrinks into the distance, with gentle sway
-        const sway = Math.sin(D * 0.6) * 9;
-        const bob = Math.cos(D * 0.9) * 3;
-        const distance = Math.pow(launch, 1.65);
-        const carScale = lerp(3.15, 0.08, distance);
-        const carY = lerp(690, HORIZON + 32, distance);
+        const cruiseY = compact ? HORIZON + 112 : HORIZON + 124;
+        const startY = compact ? BOTTOM - 48 : BOTTOM - 58;
+        const carY = lerp(startY, cruiseY, launch);
+        const carDepth = clamp01((carY - HORIZON) / (BOTTOM - HORIZON));
+        const closeBoost = (1 - launch) * (compact ? 0.12 : 0.18);
+        const carScale = carDepth * (compact ? 1.05 : 1.12) + closeBoost;
         car.setAttribute(
           "transform",
-          `translate(${500 + sway} ${carY + bob}) scale(${carScale})`,
+          `translate(500 ${carY}) scale(${carScale})`,
         );
 
         if (scene) {
@@ -136,6 +139,18 @@ export function useRoadTimeline({ scope, carRef, sunRef, reduced, compact }: Ref
       }
 
       frame(0); // no first-paint flash
+      let latestP = 0;
+      let cruiseD = 0;
+      let lastTick = performance.now();
+      const tick = () => {
+        const now = performance.now();
+        const dt = Math.min(0.05, (now - lastTick) / 1000);
+        lastTick = now;
+        const cruiseBlend = smooth(CRUISE_START, CRUISE_FULL, latestP);
+        if (cruiseBlend <= 0) return;
+        cruiseD += dt * CRUISE_SPEED * cruiseBlend;
+        frame(latestP, cruiseD);
+      };
 
       gsap.set(scene, {
         opacity: 0.18,
@@ -156,7 +171,19 @@ export function useRoadTimeline({ scope, carRef, sunRef, reduced, compact }: Ref
           invalidateOnRefresh: true,
         },
       });
-      tl.to(proxy, { p: 1, duration: 1, onUpdate: () => frame(proxy.p) }, 0);
+      tl.to(
+        proxy,
+        {
+          p: 1,
+          duration: 1,
+          onUpdate: () => {
+            latestP = proxy.p;
+            if (latestP < CRUISE_START) cruiseD = 0;
+            frame(latestP, cruiseD);
+          },
+        },
+        0,
+      );
 
       if (speedLines) {
         tl.to(speedLines, { opacity: 0.32, duration: 0.08 }, 0.14).to(
@@ -165,6 +192,9 @@ export function useRoadTimeline({ scope, carRef, sunRef, reduced, compact }: Ref
           0.3,
         );
       }
+
+      gsap.ticker.add(tick);
+      return () => gsap.ticker.remove(tick);
     },
     { scope, dependencies: [reduced, compact] },
   );

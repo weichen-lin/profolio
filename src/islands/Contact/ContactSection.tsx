@@ -8,10 +8,9 @@ import {
   useTransform,
 } from "motion/react";
 import { LiquidGlassCard } from "../../components/ui/liquid-glass";
+import { sectionRange } from "../scrollSections";
 
-const TOTAL_SECTIONS = 6;
 const CONTACT_SECTION_INDEX = 5;
-const FADE_PORTION = 0.1;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Google Apps Script web-app URL (public endpoint, not a secret).
@@ -26,18 +25,6 @@ type ContactForm = {
 type ContactErrors = Partial<ContactForm>;
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
 
-function sectionRange(index: number) {
-  const size = 1 / TOTAL_SECTIONS;
-  const start = index * size;
-  const end = start + size;
-  const fade = size * FADE_PORTION;
-  return {
-    input: [start, start + fade, end - fade, end],
-    visibleStart: start + fade,
-    visibleEnd: end - fade,
-  };
-}
-
 export default function ContactSection() {
   const reduceMotion = useReducedMotion();
   const [visible, setVisible] = useState(false);
@@ -47,14 +34,13 @@ export default function ContactSection() {
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const { scrollYProgress } = useScroll();
   const range = sectionRange(CONTACT_SECTION_INDEX);
-  const opacity = useTransform(scrollYProgress, range.input, [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, range.input, range.output);
   const y = useTransform(scrollYProgress, range.input, [
     reduceMotion ? 0 : 20,
     0,
     0,
-    reduceMotion ? 0 : -20,
   ]);
-  const scale = useTransform(scrollYProgress, range.input, [0.98, 1, 1, 0.98]);
+  const scale = useTransform(scrollYProgress, range.input, [0.98, 1, 1]);
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const nextVisible =

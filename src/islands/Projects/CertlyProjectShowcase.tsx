@@ -9,22 +9,9 @@ import {
   useTransform,
 } from "motion/react";
 import { LiquidGlassCard } from "../../components/ui/liquid-glass";
+import { sectionRange } from "../scrollSections";
 
-const TOTAL_SECTIONS = 6;
 const PROJECT_SECTION_INDEX = 4;
-const FADE_PORTION = 0.1;
-
-function sectionRange(index: number) {
-  const size = 1 / TOTAL_SECTIONS;
-  const start = index * size;
-  const end = start + size;
-  const fade = size * FADE_PORTION;
-  return {
-    input: [start, start + fade, end - fade, end],
-    visibleStart: start + fade,
-    visibleEnd: end - fade,
-  };
-}
 
 type ProjectShowcaseData = {
   name: string;
@@ -61,7 +48,7 @@ function ProjectShowcase({ project }: { project: ProjectShowcaseData }) {
   const visibleRef = useRef(false);
   const { scrollYProgress } = useScroll();
   const range = sectionRange(PROJECT_SECTION_INDEX);
-  const opacity = useTransform(scrollYProgress, range.input, [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, range.input, range.output);
   const y = useTransform(scrollYProgress, range.input, [
     reduceMotion ? 0 : 20,
     0,
